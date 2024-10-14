@@ -14,6 +14,9 @@ pub fn bench_walkdir(c: &mut Criterion) {
     let mut g = c.benchmark_group("bench_serial");
 
     // single-thread tests
+    g.bench_function("find", |b| {
+        b.iter(|| black_box(find_walkdir(&work_dir)))
+    });
     g.bench_function("fts_walkdir", |b| {
         b.iter(|| black_box(fts_walkdir(&work_dir)))
     });

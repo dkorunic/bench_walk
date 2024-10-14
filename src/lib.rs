@@ -28,6 +28,12 @@ pub fn prepare_test_dir(sub_dir: &str) -> Result<PathBuf, Error> {
     Ok(target_dir)
 }
 
+pub fn find_walkdir(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    Command::new("find").arg(root).output().unwrap();
+}
+
 pub fn fts_walkdir(root: impl AsRef<Path>) {
     let root = root.as_ref();
 
