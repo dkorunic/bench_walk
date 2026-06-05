@@ -11,13 +11,13 @@ edition = "2021"
 [dependencies]
 walkdir = "2.5.0"
 fts = "0.3.0"
-ignore = "0.4.23"
+ignore = "0.4.26"
 jwalk = "0.8.1"
-num_cpus = "1.16.0"
+num_cpus = "1.17.0"
 project-root = "0.2.2"
 
 [dev-dependencies]
-criterion = "0.5.1"
+criterion = "0.8.2"
 rm_rf = "0.6.2"
 
 [[bench]]
