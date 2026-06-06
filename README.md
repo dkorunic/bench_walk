@@ -2,31 +2,31 @@
 
 ## About
 
-This is a small benchmarking project to compare different Rust directory walking crates, namely:
+This is a small benchmarking project that compares different Rust directory-walking crates, namely:
 
-- [fts_walkdir](https://github.com/dalance/fts-rs)
-- [walkdir](https://github.com/BurntSushi/walkdir)
+- [fts_walkdir](https://crates.io/crates/fts)
+- [walkdir](https://crates.io/crates/walkdir)
 - [walkdir_minimal](https://crates.io/crates/walkdir_minimal)
-- [ignore](https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore)
-- [jwalk](https://github.com/Byron/jwalk)
-- [fs-walk](https://github.com/0xrawsec/fs-walk)
+- [ignore](https://crates.io/crates/ignore)
+- [jwalk](https://crates.io/crates/jwalk)
+- [fs-walk](https://crates.io/crates/fs-walk)
 - [async-walkdir](https://crates.io/crates/async-walkdir)
 
-The system `find` command (GNU findutils) is also benchmarked as a non-crate baseline reference.
+The system `find` command (GNU findutils) is also benchmarked as a non-crate baseline.
 
-These are tested against Linux kernel Git repo which is checked out locally during benchmark suite run. All the above crates are tested in single-thread mode as well as multi-thread mode where supported (only ignore and jwalk support parallel execution).
+All crates are tested against the Linux kernel Git repository, which is checked out locally during the benchmark run. Each crate is exercised in single-threaded mode, and additionally in multi-threaded mode where supported (only `ignore` and `jwalk` offer parallel traversal).
 
-Benchmark suite uses [Criterion](https://github.com/bheisler/criterion.rs) for statistically correct benchmarking and is meant for real life comparison between different walking implementations.
+The benchmark suite uses [Criterion](https://github.com/bheisler/criterion.rs) for statistically rigorous measurement, and is intended as a real-life comparison between the different walking implementations.
 
 ## Results
 
 ### Hardware
 
-Low-end server 8-core Xeon E5-1630, 4-drive SATA RAID-10 w/ ext4 filesystem
+Low-end server, 8-core Xeon E5-1630 v3, 4-drive SATA RAID-10 with ext4 filesystem.
 
 ### Duration report
 
-Benchmarks have been split into two groups, bench_serial and bench_parallel for comparison.
+Benchmarks are split into two groups for comparison: `bench_serial` (single-threaded) and `bench_parallel` (multi-threaded).
 
 | crate                                      | lower bound | best estimate | upper bound |
 | ------------------------------------------ | ----------- | ------------- | ----------- |
