@@ -1,7 +1,9 @@
 use bench_walk::{
-    async_walkdir, find_walkdir, fs_walk_serial, fts_walkdir, ignore_parallel,
-    ignore_serial, jwalk_parallel, jwalk_serial, prepare_test_dir,
-    regular_walkdir, walkdir_minimal,
+    async_walkdir, find_walkdir, fs_walk_serial, fsindex_parallel,
+    fsindex_serial, fts_walkdir, ignore_parallel, ignore_serial,
+    isideload_walkdir, jwalk_parallel, jwalk_serial, prepare_test_dir,
+    regular_walkdir, scandir_parallel, swdir_parallel, walkdir_minimal,
+    walker_walkdir,
 };
 use criterion::{criterion_group, criterion_main, Criterion};
 use rm_rf::ensure_removed;
@@ -36,6 +38,12 @@ pub fn bench_walkdir(c: &mut Criterion) {
     g.bench_function("walkdir_minimal", |b| {
         b.iter(|| walkdir_minimal(black_box(&work_dir)));
     });
+    g.bench_function("isideload-walkdir", |b| {
+        b.iter(|| isideload_walkdir(black_box(&work_dir)));
+    });
+    g.bench_function("walker", |b| {
+        b.iter(|| walker_walkdir(black_box(&work_dir)));
+    });
     g.bench_function("ignore (serial unsorted)", |b| {
         b.iter(|| ignore_serial(black_box(&work_dir)));
     });
@@ -44,6 +52,9 @@ pub fn bench_walkdir(c: &mut Criterion) {
     });
     g.bench_function("fs_walk (serial unsorted)", |b| {
         b.iter(|| fs_walk_serial(black_box(&work_dir)));
+    });
+    g.bench_function("fsindex (serial)", |b| {
+        b.iter(|| fsindex_serial(black_box(&work_dir)));
     });
     g.bench_function("async-walkdir (block_on)", |b| {
         b.iter(|| async_walkdir(black_box(&work_dir)));
@@ -59,6 +70,15 @@ pub fn bench_walkdir(c: &mut Criterion) {
     });
     g.bench_function("jwalk (n threads, unsorted)", |b| {
         b.iter(|| jwalk_parallel(black_box(&work_dir)));
+    });
+    g.bench_function("scandir (n threads)", |b| {
+        b.iter(|| scandir_parallel(black_box(&work_dir)));
+    });
+    g.bench_function("swdir (n threads)", |b| {
+        b.iter(|| swdir_parallel(black_box(&work_dir)));
+    });
+    g.bench_function("fsindex (parallel)", |b| {
+        b.iter(|| fsindex_parallel(black_box(&work_dir)));
     });
 
     g.finish();

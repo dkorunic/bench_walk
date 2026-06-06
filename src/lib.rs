@@ -59,6 +59,25 @@ pub fn regular_walkdir(root: impl AsRef<Path>) {
     for _ in walkdir::WalkDir::new(root) {}
 }
 
+pub fn isideload_walkdir(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    for _ in isideload_walkdir::WalkDir::new(root) {}
+}
+
+/// Walks `root` using the `walker` crate.
+///
+/// # Panics
+///
+/// Panics if `root` cannot be opened.
+pub fn walker_walkdir(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    for _ in walker::Walker::new(root)
+        .expect("walker: unable to open root directory")
+    {}
+}
+
 pub fn ignore_serial(root: impl AsRef<Path>) {
     let root = root.as_ref();
 
@@ -95,12 +114,32 @@ pub fn fs_walk_serial(root: impl AsRef<Path>) {
 
     for _ in fs_walk::WalkOptions::new().walk(root) {}
 }
+/// Builds an `fsindex` configuration that traverses the whole tree (no
+/// `.gitignore` handling, hidden files included) and skips reading file
+/// contents, so it measures traversal rather than I/O throughput.
+fn fsindex_config() -> fsindex::Config {
+    fsindex::Config::builder()
+        .respect_gitignore(false)
+        .include_hidden(true)
+        .read_contents(false)
+        .build()
+}
+pub fn fsindex_serial(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    for _ in fsindex::FileIndexer::with_config(root, fsindex_config()).files()
+    {
+    }
+}
 pub fn jwalk_serial(root: impl AsRef<Path>) {
     let root = root.as_ref();
 
-    for _ in jwalk::WalkDir::new(root).parallelism(jwalk::Parallelism::Serial)
-    {
-    }
+    // `skip_hidden` defaults to true; disable it so jwalk traverses the full
+    // tree (including `.git`) like every other crate here.
+    for _ in jwalk::WalkDir::new(root)
+        .parallelism(jwalk::Parallelism::Serial)
+        .skip_hidden(false)
+    {}
 }
 pub fn async_walkdir(root: impl AsRef<Path>) {
     use futures_lite::stream::StreamExt;
@@ -115,5 +154,38 @@ pub fn async_walkdir(root: impl AsRef<Path>) {
 pub fn jwalk_parallel(root: impl AsRef<Path>) {
     let root = root.as_ref();
 
-    for _ in jwalk::WalkDir::new(root) {}
+    for _ in jwalk::WalkDir::new(root).skip_hidden(false) {}
+}
+/// Walks `root` using the `scandir` crate, which traverses in parallel
+/// internally (backed by a `jwalk` fork).
+///
+/// # Panics
+///
+/// Panics if `root` cannot be opened or if traversal fails.
+pub fn scandir_parallel(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    // `store = Some(false)` keeps scandir from retaining every entry in
+    // memory; `collect()` still drains the full traversal off its channel.
+    // `skip_hidden` defaults to true, so disable it to walk the full tree.
+    let mut walk = scandir::Walk::new(root, Some(false))
+        .expect("scandir: unable to open root directory")
+        .skip_hidden(false);
+    walk.collect().expect("scandir: traversal failed");
+}
+pub fn swdir_parallel(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    swdir::Swdir::new()
+        .root_path(root)
+        .recurse(swdir::Recurse::Unlimited)
+        .max_threads(num_cpus::get())
+        .sort_order(swdir::SortOrder::Filesystem)
+        .clear_filters()
+        .walk();
+}
+pub fn fsindex_parallel(root: impl AsRef<Path>) {
+    let root = root.as_ref();
+
+    fsindex::FileIndexer::with_config(root, fsindex_config()).files_parallel();
 }
